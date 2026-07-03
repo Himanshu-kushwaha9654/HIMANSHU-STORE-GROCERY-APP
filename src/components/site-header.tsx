@@ -76,7 +76,7 @@ export function SiteHeader() {
                       <div className="truncate text-xs text-muted-foreground">{user.email}</div>
                     </div>
                     <Link
-                      to="/_authenticated/profile"
+                      to="/profile"
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted"
                     >
