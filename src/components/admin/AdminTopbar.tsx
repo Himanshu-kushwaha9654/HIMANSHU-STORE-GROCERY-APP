@@ -1,12 +1,13 @@
-import { Search, Bell, Plus, Moon, Sun } from "lucide-react";
+import { Search, Bell, Plus, Menu } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 
 interface AdminTopbarProps {
   onOpenSearch: () => void;
+  onToggleSidebar?: () => void;
 }
 
-export function AdminTopbar({ onOpenSearch }: AdminTopbarProps) {
+export function AdminTopbar({ onOpenSearch, onToggleSidebar }: AdminTopbarProps) {
   const { user } = useAuth();
   const initial = (user?.user_metadata?.full_name || user?.email || "?").charAt(0).toUpperCase();
 
@@ -14,7 +15,15 @@ export function AdminTopbar({ onOpenSearch }: AdminTopbarProps) {
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
       
       {/* Left section: Global Search trigger */}
-      <div className="flex-1 flex items-center">
+      <div className="flex-1 flex items-center gap-2">
+        {onToggleSidebar && (
+          <button 
+            onClick={onToggleSidebar}
+            className="lg:hidden size-9 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+          >
+            <Menu className="size-5" />
+          </button>
+        )}
         <button 
           onClick={onOpenSearch}
           className="flex items-center gap-3 w-full max-w-md px-4 py-2 bg-slate-100 hover:bg-slate-200 transition-colors rounded-xl text-slate-500 text-sm font-medium border border-transparent focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none"

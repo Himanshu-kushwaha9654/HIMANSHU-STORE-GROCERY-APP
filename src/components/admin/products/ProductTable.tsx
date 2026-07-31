@@ -251,6 +251,81 @@ const ProductRow = memo(({ product, isSelected, onToggleSelect }: { product: Pro
   return prev.product.id === next.product.id && prev.isSelected === next.isSelected && prev.product.updated_at === next.product.updated_at;
 });
 
+const ProductCardMobile = memo(({ product, isSelected, onToggleSelect }: { product: Product, isSelected: boolean, onToggleSelect: (id: string) => void }) => {
+  const price = product.discount > 0 ? product.price - (product.price * product.discount / 100) : product.price;
+  const categoryName = MOCK_CATEGORIES.find(c => c.id === product.categoryId)?.name || product.categoryId;
+  
+  return (
+    <div className={`p-4 rounded-xl border mb-3 relative flex flex-col gap-3 transition-colors ${isSelected ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200 shadow-sm'}`}>
+      <div className="flex gap-3">
+        {/* Checkbox & Image */}
+        <div className="flex flex-col items-center gap-2">
+          <input 
+            type="checkbox" 
+            className="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+            checked={isSelected}
+            onChange={() => onToggleSelect(product.id)}
+          />
+          <div className="size-16 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 mt-1">
+            <img 
+              src={product.images && product.images.length > 0 ? product.images[0] : getPlaceholderImage(categoryName)} 
+              alt={product.name} 
+              loading="lazy"
+              onError={(e) => { e.currentTarget.src = getPlaceholderImage(categoryName); }}
+              className="w-full h-full object-cover" 
+            />
+          </div>
+        </div>
+
+        {/* Details */}
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start gap-2">
+            <Link to={`/admin/products/${product.id}`} className="font-bold text-slate-800 hover:text-emerald-600 line-clamp-2 text-sm leading-snug">
+              {product.name}
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="text-slate-400 hover:text-slate-600 outline-none -mt-1 p-1">
+                  <MoreHorizontal className="size-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 z-50">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to={`/admin/products/${product.id}`} className="cursor-pointer">
+                    <Edit2 className="mr-2 size-4" /> Edit
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <div className="text-xs text-slate-500 font-medium mt-1 mb-1 line-clamp-1">{categoryName} • {product.brandId || "No Brand"}</div>
+          
+          <div className="flex items-center justify-between mt-2">
+            <div>
+              <span className="font-black text-slate-800 text-sm">₹{price}</span>
+              {product.discount > 0 && <span className="text-xs text-slate-400 line-through ml-1.5">₹{product.price}</span>}
+            </div>
+            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+              product.stockQty === 0 ? 'bg-rose-50 text-rose-700' :
+              product.status === 'draft' ? 'bg-slate-100 text-slate-600' :
+              product.stockQty <= (product.minStock || 10) ? 'bg-amber-50 text-amber-700' :
+              'bg-emerald-50 text-emerald-700'
+            }`}>
+              {product.stockQty === 0 ? 'Out of Stock' :
+               product.status === 'draft' ? 'Draft' :
+               product.stockQty <= (product.minStock || 10) ? 'Low Stock' : 'Active'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}, (prev, next) => {
+  return prev.product.id === next.product.id && prev.isSelected === next.isSelected && prev.product.updated_at === next.product.updated_at;
+});
+
 export const ProductTable = memo(function ProductTable({ products, selectedIds, onToggleSelect, onToggleSelectAll, isLoading }: ProductTableProps) {
   const allSelected = products.length > 0 && selectedIds.size === products.length;
 
@@ -273,10 +348,35 @@ export const ProductTable = memo(function ProductTable({ products, selectedIds, 
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full relative mt-4 flex flex-col max-h-[600px]">
-      <div className="overflow-auto custom-scrollbar flex-1 relative">
-        <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap min-w-max border-collapse">
-          <thead className="text-xs uppercase bg-slate-50 text-slate-500 font-bold tracking-wider sticky top-0 z-20 shadow-sm">
+    <div className="w-full relative mt-4">
+      {/* Mobile Header (Select All) */}
+      <div className="md:hidden flex items-center gap-3 mb-3 px-1">
+        <input 
+          type="checkbox" 
+          className="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+          checked={allSelected}
+          onChange={onToggleSelectAll}
+        />
+        <span className="text-sm font-bold text-slate-600">Select All ({products.length})</span>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden">
+        {products.map((product) => (
+          <ProductCardMobile 
+            key={product.id}
+            product={product}
+            isSelected={selectedIds.has(product.id)}
+            onToggleSelect={onToggleSelect}
+          />
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-col max-h-[600px]">
+        <div className="overflow-auto custom-scrollbar flex-1 relative">
+          <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap min-w-max border-collapse">
+            <thead className="text-xs uppercase bg-slate-50 text-slate-500 font-bold tracking-wider sticky top-0 z-20 shadow-sm">
             <tr>
               <th scope="col" className="p-4 w-10 sticky left-0 z-30 bg-slate-50 border-b border-slate-200">
                 <input 
@@ -316,6 +416,7 @@ export const ProductTable = memo(function ProductTable({ products, selectedIds, 
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 });

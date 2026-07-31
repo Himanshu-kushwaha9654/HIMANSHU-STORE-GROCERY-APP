@@ -61,7 +61,7 @@ function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent"></div>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-[1750px] w-[96%] pt-6 px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto max-w-[1750px] w-full px-4 sm:w-[96%] sm:px-6 lg:px-8 pt-4 lg:pt-6">
           
           {/* Top Floating Nav */}
           <div className="flex justify-center mb-12">
@@ -70,7 +70,7 @@ function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 pb-8 lg:pb-16">
             
             {/* Left Content */}
             <div className="flex flex-col items-start justify-center pt-8">
@@ -79,7 +79,7 @@ function Home() {
                 Freshness You Can Trust
               </div>
               
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-bold text-[#2C2C2E] leading-[1.1] tracking-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-bold text-[#2C2C2E] leading-[1.1] tracking-tight mb-4 lg:mb-6">
                 Fresh Grocery,<br/>
                 <span className="text-emerald-600 relative">
                   Delivered Fast
@@ -93,7 +93,7 @@ function Home() {
                 From farm fresh vegetables to daily essentials, everything delivered to your doorstep in minutes.
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 mb-10">
+              <div className="flex flex-wrap items-center gap-2 lg:gap-4 mb-8 lg:mb-10 w-full sm:w-auto">
                 <div className="flex items-center gap-2 bg-white rounded-xl p-2.5 shadow-sm border border-slate-100">
                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600"><Zap className="w-4 h-4" /></div>
                    <div className="flex flex-col"><span className="text-xs font-bold text-[#2C2C2E] leading-tight">10 Min</span><span className="text-[10px] text-slate-500 font-medium">Express Delivery</span></div>
@@ -108,7 +108,7 @@ function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3 lg:gap-4">
                 <Magnetic maxPull={8}>
                   <motion.button 
                     data-cursor="button"
@@ -198,8 +198,8 @@ function Home() {
 
           </div>
         </div>   {/* Floating Trust Bar */}
-        <div className="relative z-20 mx-auto max-w-[1750px] w-[96%] px-4 pb-8">
-           <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 md:p-6 flex flex-wrap lg:flex-nowrap items-center justify-between gap-6">
+        <div className="relative z-20 mx-auto max-w-[1750px] w-full px-4 sm:w-[96%] sm:px-6 pb-8">
+           <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 md:p-6 grid grid-cols-2 lg:flex items-center justify-between gap-4 lg:gap-6">
               {[
                 { icon: Leaf, title: "Farm Fresh", sub: "Handpicked Daily", color: "bg-emerald-50 text-emerald-600" },
                 { icon: ShieldCheck, title: "Best Prices", sub: "You Save More", color: "bg-emerald-50 text-emerald-600" },
@@ -221,8 +221,8 @@ function Home() {
         </div>
 
         {/* Super Saver Deals Banner */}
-        <div className="relative z-20 mx-auto max-w-[1750px] w-[96%] px-4 pb-12">
-          <div className="bg-[#0f2e1f] rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
+        <div className="relative z-20 mx-auto max-w-[1750px] w-full px-4 sm:w-[96%] sm:px-6 pb-12">
+          <div className="bg-[#0f2e1f] rounded-2xl p-5 lg:p-6 flex flex-col md:flex-row items-center justify-between gap-5 lg:gap-6 overflow-hidden relative">
             <div className="absolute right-0 top-0 h-full w-1/3 opacity-20 pointer-events-none">
               <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80" alt="veggies" className="w-full h-full object-cover" />
             </div>
@@ -256,8 +256,8 @@ function Home() {
       <PromoCarousel />
 
       {/* Premium Categories Carousel */}
-      <section className="relative w-full py-16 bg-white overflow-hidden mt-16">
-        <div className="mx-auto max-w-[1750px] w-[96%] relative z-10">
+      <section className="relative w-full py-12 lg:py-16 bg-white overflow-hidden mt-12 lg:mt-16">
+        <div className="mx-auto max-w-[1750px] w-full px-4 sm:w-[96%] sm:px-6 relative z-10">
           <PremiumCarousel
             title={<><span className="text-2xl">🛒</span> Shop by Category</>}
             headerAction={

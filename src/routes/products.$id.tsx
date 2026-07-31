@@ -87,16 +87,16 @@ function ProductDetail() {
       <motion.div 
         layoutId={`product-card-${product.id}`}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 bg-white min-h-screen relative"
+        className="mx-auto max-w-7xl px-0 sm:px-6 py-4 lg:py-8 bg-white min-h-screen relative pb-32 lg:pb-0"
       >
         <button
           onClick={() => goBack("/products")}
-          className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors z-50 relative mb-8"
+          className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors z-50 relative mb-4 lg:mb-8 px-4 sm:px-0"
         >
           <ArrowLeft className="size-4" /> Back to shop
         </button>
 
-        <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr] relative z-10">
+        <div className="grid gap-6 lg:gap-12 lg:grid-cols-[1.2fr_1fr] relative z-10 px-4 sm:px-0">
           
           {/* Left Side: Product Gallery */}
           <div className="sticky top-24 self-start">
@@ -130,7 +130,7 @@ function ProductDetail() {
             
             <motion.h1 
               layoutId={`product-title-${product.id}`}
-              className="text-4xl font-bold tracking-tight sm:text-5xl text-[#2C2C2E] leading-[1.1]"
+              className="text-3xl sm:text-4xl font-bold tracking-tight lg:text-5xl text-[#2C2C2E] leading-[1.1]"
             >
               {product.name}
             </motion.h1>
@@ -159,7 +159,7 @@ function ProductDetail() {
               <div className="flex items-end gap-4">
                 <motion.span 
                   layoutId={`product-price-${product.id}`}
-                  className="text-6xl font-bold text-[#2C2C2E] tracking-tighter"
+                  className="text-4xl lg:text-6xl font-bold text-[#2C2C2E] tracking-tighter"
                 >
                   {formatCurrency(product.price)}
                 </motion.span>
@@ -187,7 +187,7 @@ function ProductDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-8 p-6 bg-slate-50 rounded-[32px] border border-slate-100 flex flex-col gap-6 shadow-inner"
+              className="mt-6 lg:mt-8 p-4 lg:p-6 bg-slate-50 rounded-[24px] lg:rounded-[32px] border border-slate-100 flex flex-col gap-4 lg:gap-6 shadow-inner hidden lg:flex"
             >
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="flex items-center justify-between rounded-2xl bg-white p-2 shadow-sm border border-slate-100 w-full sm:w-[160px] h-16">
@@ -329,7 +329,7 @@ function ProductDetail() {
           </div>
         </div>
 
-        <div className="mt-32 mb-20 flex flex-col gap-16 relative z-10 border-t border-slate-100 pt-16">
+        <div className="mt-12 lg:mt-32 mb-10 lg:mb-20 flex flex-col gap-8 lg:gap-16 relative z-10 border-t border-slate-100 pt-8 lg:pt-16">
           {frequentlyBought.length > 0 && (
             <RecommendationCarousel 
               title="Frequently Bought Together" 
@@ -360,10 +360,10 @@ function ProductDetail() {
         </div>
       </motion.div>
 
-      {/* Sticky Buy Bar (appears on scroll) */}
+      {/* Sticky Buy Bar (Desktop only) */}
       <motion.div 
         style={{ opacity: buyBarOpacity, y: buyBarY }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-2xl border-t border-slate-200 p-4 shadow-[0_-20px_40px_-20px_rgba(0,0,0,0.1)] hidden sm:block"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-2xl border-t border-slate-200 p-4 shadow-[0_-20px_40px_-20px_rgba(0,0,0,0.1)] hidden lg:block"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
@@ -398,6 +398,29 @@ function ProductDetail() {
           </div>
         </div>
       </motion.div>
+
+      {/* Sticky Buy Bar (Mobile only) */}
+      <div className="fixed bottom-[72px] left-0 right-0 z-40 bg-white border-t border-slate-100 p-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] lg:hidden flex items-center justify-between gap-4 pb-safe">
+          <div className="flex flex-col leading-none min-w-[80px]">
+             {product.compareAt && (
+               <span className="mb-0.5 text-[11px] font-bold text-slate-400 line-through">
+                 {formatCurrency(product.compareAt)}
+               </span>
+             )}
+             <span className="text-xl font-bold text-[#2C2C2E]">
+               {formatCurrency(product.price)}
+             </span>
+          </div>
+          <button
+            onClick={(e) => {
+              triggerFlyToCart(e, product, () => triggerPulse());
+              add(product, 1);
+            }}
+            className="flex-1 h-[48px] rounded-xl bg-emerald-500 font-bold text-white shadow-[0_8px_16px_-8px_rgba(16,185,129,0.5)] active:scale-95 flex items-center justify-center gap-2 text-base transition-transform"
+          >
+            <ShoppingBag className="size-4" /> Add to cart
+          </button>
+      </div>
     </>
   );
 }

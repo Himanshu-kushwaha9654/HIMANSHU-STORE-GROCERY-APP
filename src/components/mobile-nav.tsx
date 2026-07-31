@@ -1,74 +1,74 @@
-import { Link } from "@tanstack/react-router";
-import { Home, Compass, ShoppingCart, Heart, User } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Home, LayoutGrid, ShoppingCart, Heart, User } from "lucide-react";
 import { useCart, selectCartCount } from "@/lib/cart-store";
-
-import { LayoutGrid, Printer, ShoppingBag, ArrowUpRight, Bell } from "lucide-react";
 import { useNotificationStore } from "@/lib/notification-store";
 
 export function MobileNav() {
   const count = useCart(selectCartCount);
-  const openNotification = useNotificationStore(s => s.open);
-  const unreadCount = useNotificationStore(s => s.notifications.filter(n => !n.read).length);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Helper to determine active state exactly
+  const isActive = (path: string) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  };
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 sm:hidden">
-      <nav className="mx-auto flex h-[72px] items-center justify-between rounded-full bg-white/95 px-2 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-black/5">
+    <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-white border-t border-slate-100 pb-safe pb-2">
+      <nav className="flex items-center justify-around h-16 px-1">
         
         {/* Home */}
         <Link
           to="/"
-          className="group relative flex h-[56px] w-[72px] flex-col items-center justify-center gap-1 rounded-full transition-all [&.active]:bg-[#fdf4e3] [&.active]:text-[#2C2C2E] text-muted-foreground hover:text-[#2C2C2E]"
+          className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive("/") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
         >
-          <Home className="size-6 transition-transform group-hover:scale-110" strokeWidth={2} />
-          <span className="text-[10px] font-bold tracking-tight">Home</span>
+          <Home className={`size-[22px] ${isActive("/") ? "fill-emerald-600/20" : ""}`} strokeWidth={isActive("/") ? 2.5 : 2} />
+          <span className="text-[10px] font-semibold tracking-tight">Home</span>
         </Link>
         
-        {/* Order Again */}
-        <Link
-          to="/products"
-          className="group relative flex h-[56px] w-[72px] flex-col items-center justify-center gap-1 rounded-full transition-all [&.active]:bg-[#fdf4e3] [&.active]:text-[#2C2C2E] text-muted-foreground hover:text-[#2C2C2E]"
-        >
-          <ShoppingBag className="size-6 transition-transform group-hover:scale-110" strokeWidth={2} />
-          <span className="text-[10px] font-bold tracking-tight">Order Again</span>
-        </Link>
-
         {/* Categories */}
         <Link
+          to="/products"
+          className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive("/products") || isActive("/category") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
+        >
+          <LayoutGrid className={`size-[22px] ${isActive("/products") || isActive("/category") ? "fill-emerald-600/20" : ""}`} strokeWidth={isActive("/products") || isActive("/category") ? 2.5 : 2} />
+          <span className="text-[10px] font-semibold tracking-tight">Categories</span>
+        </Link>
+
+        {/* Cart */}
+        <Link
           to="/cart"
-          className="group relative flex h-[56px] w-[72px] flex-col items-center justify-center gap-1 rounded-full transition-all [&.active]:bg-[#fdf4e3] [&.active]:text-[#2C2C2E] text-muted-foreground hover:text-[#2C2C2E]"
+          className={`relative flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive("/cart") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
         >
           <div className="relative">
-            <LayoutGrid className="size-6 transition-transform group-hover:scale-110" strokeWidth={2} />
+            <ShoppingCart className={`size-[22px] ${isActive("/cart") ? "fill-emerald-600/20" : ""}`} strokeWidth={isActive("/cart") ? 2.5 : 2} />
             {count > 0 && (
-              <span className="absolute -right-2 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
+              <span className="absolute -right-2 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-white">
                 {count}
               </span>
             )}
           </div>
-          <span className="text-[10px] font-bold tracking-tight">Categories</span>
+          <span className="text-[10px] font-semibold tracking-tight">Cart</span>
         </Link>
 
         {/* Wishlist */}
         <Link
           to="/wishlist"
-          className="group relative flex h-[56px] w-[72px] flex-col items-center justify-center gap-1 rounded-full transition-all [&.active]:bg-[#fdf4e3] [&.active]:text-[#2C2C2E] text-muted-foreground hover:text-[#2C2C2E]"
+          className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive("/wishlist") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
         >
-          <div className="relative">
-            <Heart className="size-6 transition-transform group-hover:scale-110" strokeWidth={2} />
-          </div>
-          <span className="text-[10px] font-bold tracking-tight">Wishlist</span>
+          <Heart className={`size-[22px] ${isActive("/wishlist") ? "fill-emerald-600/20" : ""}`} strokeWidth={isActive("/wishlist") ? 2.5 : 2} />
+          <span className="text-[10px] font-semibold tracking-tight">Wishlist</span>
         </Link>
 
-        {/* Zomato */}
+        {/* Profile */}
         <Link
-          to="/"
-          className="group relative flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#f43f5e] text-white shadow-md transition-transform hover:scale-105 active:scale-95 ml-1"
+          to="/_authenticated/profile"
+          className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive("/_authenticated/profile") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
         >
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-[11px] font-bold tracking-wide mb-0.5">zomato</span>
-            <ArrowUpRight className="size-3" strokeWidth={3} />
-          </div>
+          <User className={`size-[22px] ${isActive("/_authenticated/profile") ? "fill-emerald-600/20" : ""}`} strokeWidth={isActive("/_authenticated/profile") ? 2.5 : 2} />
+          <span className="text-[10px] font-semibold tracking-tight">Profile</span>
         </Link>
+        
       </nav>
     </div>
   );

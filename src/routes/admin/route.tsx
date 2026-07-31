@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { AdminGlobalSearch } from "@/components/admin/AdminGlobalSearch";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Menu } from "lucide-react";
 import "@/admin.css";
 
 export const Route = createFileRoute("/admin")({
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminLayout() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Block back navigation that attempts to leave the admin panel
   useBlocker({
@@ -52,11 +54,22 @@ function AdminLayout() {
     <div className="admin-theme flex h-screen bg-[#F8F9FA] overflow-hidden">
       
       {/* Premium Sidebar */}
-      <AdminSidebar />
+      <AdminSidebar mobileOpen={isMobileSidebarOpen} setMobileOpen={setIsMobileSidebarOpen} />
       
+      {/* Overlay for mobile sidebar */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden" 
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Topbar */}
-        <AdminTopbar onOpenSearch={() => setIsSearchOpen(true)} />
+        <AdminTopbar 
+          onOpenSearch={() => setIsSearchOpen(true)} 
+          onToggleSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        />
         
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-slate-50/50 p-6 custom-scrollbar">

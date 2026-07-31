@@ -74,7 +74,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
     <motion.div 
       data-cursor="product"
       onClick={() => setActiveProduct(product)}
-      className="product-card-container w-full text-left relative flex flex-col rounded-[24px] bg-white p-3 ring-1 ring-slate-100 cursor-pointer outline-none"
+      className="product-card-container w-full text-left relative flex flex-col rounded-[24px] bg-white p-2.5 sm:p-3 ring-1 ring-slate-100 cursor-pointer outline-none"
         style={{
           rotateX,
           rotateY,
@@ -154,7 +154,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
       {/* Product Image */}
       <div 
-        className="relative block aspect-[4/3] overflow-hidden rounded-xl bg-slate-50 mb-3 mt-6 mx-2 group/img"
+        className="relative block aspect-[4/3] overflow-hidden rounded-xl bg-slate-50 mb-2 sm:mb-3 mt-4 sm:mt-6 mx-1 sm:mx-2 group/img"
         style={{ transform: "translateZ(20px)" }}
       >
         <motion.img
@@ -182,7 +182,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
 
         <motion.div 
           transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
-          className="line-clamp-2 text-sm font-semibold leading-snug text-[#2C2C2E] group-hover:text-emerald-600 transition-colors h-[40px]"
+          className="line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-[#2C2C2E] group-hover:text-emerald-600 transition-colors h-[36px] sm:h-[40px]"
         >
           {product.name || "Premium Product"}
         </motion.div>
@@ -191,7 +191,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           {product.weight || "250"} {product.unit || "g"} • {category?.name || "Groceries"}
         </p>
         
-        <div className="mt-auto pt-4 flex items-center justify-between pointer-events-auto">
+        <div className="mt-auto pt-2 sm:pt-4 flex items-center justify-between pointer-events-auto">
           <div className="flex flex-col leading-none">
             {product.compareAt && (
               <span className="mb-0.5 text-[11px] font-semibold text-slate-400 line-through">
@@ -200,7 +200,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
             )}
             <motion.span 
               transition={{ duration: 1.0, ease: [0.22, 1, 0.36, 1] }}
-              className="text-base font-semibold text-[#2C2C2E]"
+              className="text-sm sm:text-base font-semibold text-[#2C2C2E]"
             >
               {formatCurrency(product.price || 0)}
             </motion.span>
@@ -208,7 +208,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
           
           <Magnetic maxPull={8}>
             {cartItem ? (
-              <div className="flex items-center justify-between bg-emerald-50 text-emerald-600 rounded-xl h-9 w-[80px] px-1 shadow-sm border border-emerald-100">
+              <div className="flex items-center justify-between bg-emerald-50 text-emerald-600 rounded-xl h-8 sm:h-9 w-[70px] sm:w-[80px] px-1 shadow-sm border border-emerald-100">
                 <button 
                   onClick={(e) => { 
                     e.preventDefault(); 
@@ -264,7 +264,7 @@ export function ProductCard({ product: initialProduct }: { product: Product }) {
                     triggerPulse();
                   });
                 }}
-                className="relative overflow-hidden flex h-9 w-[72px] items-center justify-center rounded-xl bg-emerald-50 text-sm font-semibold text-emerald-600 shadow-sm border border-emerald-100 transition-colors hover:bg-emerald-500 hover:text-white"
+                className="relative overflow-hidden flex h-8 sm:h-9 w-[64px] sm:w-[72px] items-center justify-center rounded-xl bg-emerald-50 text-xs sm:text-sm font-semibold text-emerald-600 shadow-sm border border-emerald-100 transition-colors hover:bg-emerald-500 hover:text-white"
               >
                 <AnimatePresence mode="wait">
                   {isAdding ? (

@@ -49,7 +49,62 @@ export function OrdersTable({ orders, onRowClick, loading }: OrdersTableProps) {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="md:hidden divide-y divide-slate-100">
+        {orders.map((order) => (
+          <div 
+            key={order.id} 
+            onClick={() => onRowClick(order)}
+            className="p-4 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col gap-3"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-bold text-slate-800">#{order.invoice_number}</p>
+                <p className="text-xs font-medium text-slate-500 font-mono mt-0.5">{order.id.substring(0, 8)}...</p>
+              </div>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ring-1 ring-inset ${getStatusColor(order.order_status)}`}>
+                {order.order_status.replace(/_/g, ' ')}
+              </span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-bold text-slate-700 text-sm">{order.customer_name}</p>
+                <p className="text-xs font-medium text-slate-500 flex items-center gap-1 mt-0.5">
+                  <Phone className="size-3" /> {order.customer_phone}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-black text-slate-800 text-lg">₹{order.total_amount}</p>
+                <div className="flex items-center gap-1.5 mt-1 justify-end">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                    {order.payment_method}
+                  </span>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                    order.payment_status === 'success' ? 'text-emerald-700 bg-emerald-100' : 
+                    order.payment_status === 'pending' ? 'text-amber-700 bg-amber-100' : 'text-rose-700 bg-rose-100'
+                  }`}>
+                    {order.payment_status}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center pt-2 border-t border-slate-100 mt-1">
+              <div>
+                <p className="text-[11px] font-medium text-slate-700">{format(new Date(order.created_at), 'MMM d, h:mm a')}</p>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5">Expected: {order.expected_delivery ? format(new Date(order.expected_delivery), 'h:mm a') : 'N/A'}</p>
+              </div>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400">
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">

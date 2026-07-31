@@ -23,6 +23,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "../components/site-header";
 import { SiteFooter } from "../components/site-footer";
 import { MobileNav } from "../components/mobile-nav";
+import { MobileHeader } from "../components/mobile-header";
 import { supabase } from "@/integrations/supabase/client";
 import { CartDrawer } from "../components/cart-drawer";
 import { FlyToCartProvider } from "../components/fly-to-cart-provider";
@@ -176,17 +177,23 @@ function RootComponent() {
   }, [router, queryClient]);
 
   const isAuthPage = /^\/(login|signup|forgot-password|reset-password|otp)/.test(pathname);
-  const isAdminPage = pathname.startsWith("/admin");
-  const showCustomerUI = !isAuthPage && !isAdminPage;
+  const isAdminRoute = pathname.startsWith('/admin');
+  const isCheckoutRoute = pathname.startsWith('/checkout');
+  const showCustomerUI = !isAuthPage && !isAdminRoute && !isCheckoutRoute;
+
+  const showMobileNavHeader = !isAuthPage && !isAdminRoute && !isCheckoutRoute;
 
   return (
     <QueryClientProvider client={queryClient}>
       <FlyToCartProvider>
         <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-background sm:max-w-none overflow-x-hidden">
-        {showCustomerUI && (
-          <div className="hidden sm:block">
-            <SiteHeader />
-          </div>
+        {showMobileNavHeader && (
+          <>
+            <div className="hidden sm:block">
+              <SiteHeader />
+            </div>
+            <MobileHeader />
+          </>
         )}
         <main className="flex-1 pb-20 sm:pb-0 relative">
             <AnimatePresence mode="wait">

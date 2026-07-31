@@ -25,7 +25,12 @@ const SIDEBAR_ITEMS = [
   { name: "Settings", path: "/admin/settings", icon: Settings },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  mobileOpen?: boolean;
+  setMobileOpen?: (open: boolean) => void;
+}
+
+export function AdminSidebar({ mobileOpen, setMobileOpen }: AdminSidebarProps = {}) {
   const location = useLocation();
   const currentPath = location.pathname;
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -36,12 +41,18 @@ export function AdminSidebar() {
   };
 
   return (
-    <motion.aside 
-      initial={false}
-      animate={{ width: isCollapsed ? 80 : 260 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="bg-[#1C1C1E] border-r border-[#2C2C2E] flex flex-col shrink-0 relative z-40 h-screen text-slate-300 font-sans shadow-2xl"
-    >
+    <>
+      <motion.aside 
+        initial={false}
+        animate={{ 
+          width: isCollapsed ? 80 : 260,
+          x: mobileOpen ? 0 : 0
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className={`bg-[#1C1C1E] border-r border-[#2C2C2E] flex flex-col shrink-0 relative z-40 h-screen text-slate-300 font-sans shadow-2xl transition-transform duration-300 ${
+          mobileOpen ? "translate-x-0 fixed left-0 top-0 bottom-0" : "-translate-x-full lg:translate-x-0 absolute lg:relative"
+        }`}
+      >
       <div className="h-16 flex items-center px-6 border-b border-[#2C2C2E] shrink-0 justify-between">
         <AnimatePresence mode="popLayout">
           {!isCollapsed && (
@@ -176,5 +187,6 @@ export function AdminSidebar() {
         </button>
       </div>
     </motion.aside>
+    </>
   );
 }
