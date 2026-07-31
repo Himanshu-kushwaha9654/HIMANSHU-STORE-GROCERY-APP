@@ -1,96 +1,78 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, LogOut, Camera } from "lucide-react";
-import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
-
-const profileSchema = z.object({
-  full_name: z.string().trim().max(80).optional().or(z.literal("")),
-  phone: z.string().trim().max(30).optional().or(z.literal("")),
-  address_line1: z.string().trim().max(120).optional().or(z.literal("")),
-  address_line2: z.string().trim().max(120).optional().or(z.literal("")),
-  city: z.string().trim().max(80).optional().or(z.literal("")),
-  postal_code: z.string().trim().max(20).optional().or(z.literal("")),
-});
-
-type ProfileForm = z.infer<typeof profileSchema>;
-
-const profileQO = queryOptions({
-  queryKey: ["profile"],
-  queryFn: async () => {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) throw new Error("Not signed in");
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", u.user.id)
-      .maybeSingle();
-    if (error) throw error;
-    return { user: u.user, profile: data };
-  },
-});
+import { 
+  Loader2, LogOut, Camera, Heart, ShoppingBag, Sparkles, MapPin, 
+  CreditCard, Ticket, Bell, Settings, HelpCircle, ChevronRight, Edit3, ShieldCheck
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { ProfileService, UserProfile } from "@/lib/services/profile-service";
+import { AddressService, SavedAddress } from "@/lib/services/address-service";
+import { useRewardsStore } from "@/lib/rewards-store";
+import { EditProfileDrawer } from "@/components/profile/edit-profile-drawer";
+import { useProfileStore } from "@/lib/profile-store";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Your profile — Zest" }] }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(profileQO),
+  head: () => ({ meta: [{ title: "My Account — Himanshu Store" }] }),
   component: ProfilePage,
-  errorComponent: ({ error }) => (
-    <div className="mx-auto max-w-xl px-4 py-10 text-sm text-muted-foreground">
-      Couldn't load profile: {error.message}
-    </div>
-  ),
 });
 
+const NAV_SECTIONS = [
+  {
+    title: "My Account",
+    items: [
+      { id: "orders", icon: ShoppingBag, title: "My Orders", subtitle: "Track, return, or buy again", link: "/orders", color: "text-blue-500", bg: "bg-blue-50" },
+      { id: "wishlist", icon: Heart, title: "Wishlist", subtitle: "Your saved items", link: "/wishlist", color: "text-rose-500", bg: "bg-rose-50" },
+      { id: "addresses", icon: MapPin, title: "Saved Addresses", subtitle: "Manage delivery locations", link: "/addresses", color: "text-emerald-500", bg: "bg-emerald-50" },
+    ]
+  },
+  {
+    title: "Offers & Rewards",
+    items: [
+      { id: "rewards", icon: Sparkles, title: "Rewards Hub", subtitle: "Check points and tier benefits", link: "/rewards", color: "text-amber-500", bg: "bg-amber-50" },
+      { id: "coupons", icon: Ticket, title: "Coupons", subtitle: "View exclusive offers", link: "/coupons", color: "text-orange-500", bg: "bg-orange-50" },
+    ]
+  },
+  {
+    title: "Preferences",
+    items: [
+      { id: "payments", icon: CreditCard, title: "Payment Center", subtitle: "Manage cards & UPI", link: "/payments", color: "text-purple-500", bg: "bg-purple-50" },
+      { id: "notifications", icon: Bell, title: "Notifications", subtitle: "Alerts & updates", link: "/notifications", color: "text-pink-500", bg: "bg-pink-50" },
+      { id: "settings", icon: Settings, title: "Settings", subtitle: "App preferences", link: "/settings", color: "text-slate-500", bg: "bg-slate-50" },
+    ]
+  },
+  {
+    title: "Support",
+    items: [
+      { id: "help", icon: HelpCircle, title: "Help & Support", subtitle: "FAQs and contact", link: "/help", color: "text-indigo-500", bg: "bg-indigo-50" },
+    ]
+  }
+];
+
 function ProfilePage() {
-  const { data } = useSuspenseQuery(profileQO);
-  const qc = useQueryClient();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState<ProfileForm>({
-    full_name: data.profile?.full_name ?? "",
-    phone: data.profile?.phone ?? "",
-    address_line1: data.profile?.address_line1 ?? "",
-    address_line2: data.profile?.address_line2 ?? "",
-    city: data.profile?.city ?? "",
-    postal_code: data.profile?.postal_code ?? "",
-  });
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const { points, activeTier } = useRewardsStore();
+  
+  const { profile, loading: profileLoading, updateProfile } = useProfileStore();
+  const [defaultAddress, setDefaultAddress] = useState<SavedAddress | null>(null);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    const path = data.profile?.avatar_url;
-    if (!path) { setAvatarUrl(null); return; }
-    supabase.storage.from("avatars").createSignedUrl(path, 3600).then(({ data: s }) => {
-      if (!cancelled) setAvatarUrl(s?.signedUrl ?? null);
-    });
-    return () => { cancelled = true; };
-  }, [data.profile?.avatar_url]);
-
-  const save = useMutation({
-    mutationFn: async (values: ProfileForm) => {
-      const parsed = profileSchema.parse(values);
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          full_name: parsed.full_name || null,
-          phone: parsed.phone || null,
-          address_line1: parsed.address_line1 || null,
-          address_line2: parsed.address_line2 || null,
-          city: parsed.city || null,
-          postal_code: parsed.postal_code || null,
-        })
-        .eq("id", data.user.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Profile saved");
-      qc.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Save failed"),
-  });
+    async function loadData() {
+      try {
+        const addrs = await AddressService.getAddresses();
+        setDefaultAddress(addrs.find(a => a.isDefault) || null);
+      } catch (err) {
+        toast.error("Failed to load profile data");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   async function handleAvatar(file: File) {
     if (file.size > 5 * 1024 * 1024) {
@@ -99,117 +81,164 @@ function ProfilePage() {
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `${data.user.id}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-      if (upErr) throw upErr;
-      const { error: dbErr } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", data.user.id);
-      if (dbErr) throw dbErr;
-      toast.success("Avatar updated");
-      qc.invalidateQueries({ queryKey: ["profile"] });
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const dataUrl = reader.result as string;
+        const updated = await ProfileService.updateAvatar(dataUrl);
+        updateProfile(updated);
+        toast.success("Profile photo updated seamlessly!");
+      };
+      reader.readAsDataURL(file);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
     }
   }
 
-  async function signOut() {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+  async function handleLogout() {
+    try {
+      await ProfileService.logout();
+      toast.success("Logged out successfully");
+      navigate({ to: "/", replace: true });
+    } catch (err) {
+      toast.error("Failed to logout");
+    }
   }
 
+  if (loading || profileLoading || !profile) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  }
+
+  const membershipName = activeTier ? activeTier.charAt(0).toUpperCase() + activeTier.slice(1) : "Premium";
+
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your profile</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{data.user.email}</p>
+    <div className="min-h-screen bg-slate-50 pb-24 font-sans">
+      
+      {/* 
+        ====================================================
+        SLEEK HEADER SECTION (Blinkit/Zepto Style)
+        ====================================================
+      */}
+      <div className="bg-white border-b border-slate-100 pt-8 pb-6 px-4 sm:px-6 shadow-sm sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/* Avatar Profile Photo */}
+            <div className="relative group cursor-pointer" onClick={() => fileRef.current?.click()}>
+              <div className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-slate-100 border border-slate-200">
+                {profile.avatarDataUrl ? (
+                  <img src={profile.avatarDataUrl} alt={profile.fullName} className="size-full object-cover" />
+                ) : (
+                  <span className="text-xl font-bold text-emerald-600">
+                    {profile.fullName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                
+                {/* Overlay for hover */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Camera className="size-5 text-white" />
+                </div>
+              </div>
+              
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-full">
+                  <Loader2 className="size-4 animate-spin text-emerald-600" />
+                </div>
+              )}
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatar(f); }} />
+            </div>
+            
+            {/* User Details */}
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
+                {profile.fullName}
+                {profile.emailVerified && <ShieldCheck className="size-4 text-blue-500" />}
+              </h1>
+              <div className="flex items-center gap-3 mt-0.5">
+                <p className="text-slate-500 text-sm">{profile.phone}</p>
+                <button 
+                  onClick={() => setIsEditDrawerOpen(true)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full hover:bg-slate-100 transition-colors text-slate-500 active:scale-95 border border-transparent hover:border-slate-200"
+                >
+                  <Edit3 className="size-3" />
+                  <span className="text-xs font-semibold">Edit</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col items-end">
+            <div className="flex flex-col items-end mt-1">
+              <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-xs font-bold text-amber-600 border border-amber-100">
+                <Sparkles className="size-3" /> {membershipName}
+              </span>
+              <span className="text-xs font-bold text-slate-500 mt-1">{points} pts</span>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={signOut}
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-secondary px-4 text-sm font-semibold ring-1 ring-black/5 hover:bg-muted"
-        >
-          <LogOut className="size-4" /> Sign out
-        </button>
       </div>
 
-      <div className="rounded-3xl bg-card p-6 shadow-pop ring-1 ring-black/5">
-        <div className="mb-6 flex items-center gap-4">
-          <div className="relative">
-            <div className="flex size-20 items-center justify-center overflow-hidden rounded-full bg-secondary ring-2 ring-primary/20">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="size-full object-cover" />
-              ) : (
-                <span className="text-2xl font-bold text-primary">
-                  {(form.full_name || data.user.email || "?").charAt(0).toUpperCase()}
-                </span>
-              )}
+      {/* 
+        ====================================================
+        NAVIGATION LIST (Zepto / Blinkit Style Hub)
+        ====================================================
+      */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6">
+        
+        {NAV_SECTIONS.map((section, idx) => (
+          <div key={idx} className="mb-6">
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 ml-2">{section.title}</h3>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              {section.items.map((action, i) => {
+                const Icon = action.icon;
+                const isLast = i === section.items.length - 1;
+                
+                return (
+                  <Link key={action.id} to={action.link as any} className="block group">
+                    <div className={`flex items-center p-4 transition-colors hover:bg-slate-50 ${!isLast ? 'border-b border-slate-100' : ''}`}>
+                      <div className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${action.bg} ${action.color}`}>
+                        <Icon className="size-5" />
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <h4 className="font-bold text-slate-800 text-sm group-hover:text-emerald-600 transition-colors">{action.title}</h4>
+                        <p className="text-slate-400 text-xs mt-0.5">{action.subtitle}</p>
+                      </div>
+                      <ChevronRight className="size-5 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pop ring-2 ring-background"
-            >
-              {uploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatar(f); }}
-            />
           </div>
-          <div className="text-sm text-muted-foreground">
-            <div className="font-semibold text-foreground">{form.full_name || "Add your name"}</div>
-            Member since {new Date(data.profile?.created_at ?? Date.now()).toLocaleDateString()}
+        ))}
+
+        {/* Logout Section */}
+        <div className="mt-8 mb-8 px-2">
+          <button 
+            onClick={handleLogout}
+            className="w-full bg-white border border-slate-200 text-red-500 font-bold text-sm py-4 rounded-xl shadow-sm hover:bg-red-50 hover:border-red-100 transition-colors flex items-center justify-center gap-2 active:scale-[0.98]"
+          >
+            <LogOut className="size-4" />
+            Sign Out
+          </button>
+          
+          <div className="text-center mt-12 mb-8">
+            <p className="text-sm font-bold text-slate-400">Himanshu Store v1.0.0</p>
+            <p className="text-xs font-medium text-slate-400 mt-1">Made with ♥️ in India</p>
           </div>
         </div>
 
-        <form
-          onSubmit={(e) => { e.preventDefault(); save.mutate(form); }}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2"
-        >
-          <TextField label="Full name" value={form.full_name ?? ""} onChange={(v) => setForm({ ...form, full_name: v })} />
-          <TextField label="Phone" value={form.phone ?? ""} onChange={(v) => setForm({ ...form, phone: v })} />
-          <div className="sm:col-span-2">
-            <TextField label="Address line 1" value={form.address_line1 ?? ""} onChange={(v) => setForm({ ...form, address_line1: v })} />
-          </div>
-          <div className="sm:col-span-2">
-            <TextField label="Address line 2" value={form.address_line2 ?? ""} onChange={(v) => setForm({ ...form, address_line2: v })} />
-          </div>
-          <TextField label="City" value={form.city ?? ""} onChange={(v) => setForm({ ...form, city: v })} />
-          <TextField label="Postal code" value={form.postal_code ?? ""} onChange={(v) => setForm({ ...form, postal_code: v })} />
-
-          <div className="sm:col-span-2 pt-2">
-            <button
-              type="submit"
-              disabled={save.isPending}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-pop active:scale-[.98] disabled:opacity-60"
-            >
-              {save.isPending && <Loader2 className="size-4 animate-spin" />} Save changes
-            </button>
-          </div>
-        </form>
+        <EditProfileDrawer 
+          isOpen={isEditDrawerOpen}
+          onClose={() => setIsEditDrawerOpen(false)}
+          profile={profile}
+          onProfileUpdated={(updated) => updateProfile(updated)}
+        />
       </div>
     </div>
-  );
-}
-
-function TextField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full rounded-2xl bg-secondary px-4 text-sm outline-none ring-1 ring-black/5 focus:ring-2 focus:ring-primary/40"
-      />
-    </label>
   );
 }

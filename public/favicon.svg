@@ -1,0 +1,16 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#16a34a" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+    <mask id="leafMask">
+      <rect width="100" height="100" fill="white" />
+      <path d="M 63 46 C 72 38, 77 28, 80 22" stroke="black" stroke-width="2.5" fill="none" stroke-linecap="round" />
+    </mask>
+  </defs>
+  <rect x="11" y="24" width="16" height="60" rx="1.5" fill="#111827" />
+  <rect x="47" y="24" width="16" height="60" rx="1.5" fill="#111827" />
+  <rect x="27" y="46" width="20" height="16" fill="#111827" />
+  <path d="M 63 46 C 83 46, 89 32, 89 16 C 73 16, 63 30, 63 46 Z" fill="url(#leafGrad)" mask="url(#leafMask)" />
+</svg>

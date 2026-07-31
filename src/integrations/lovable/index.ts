@@ -2,7 +2,9 @@
 
 import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
 import { supabase } from "../supabase/client";
-const lovableAuth = createLovableAuth();
+
+// Only initialize on the client to avoid SSR crashes
+const lovableAuth = typeof window !== 'undefined' ? createLovableAuth() : null;
 
 type SignInOptions = {
   redirect_uri?: string;
@@ -12,6 +14,10 @@ type SignInOptions = {
 export const lovable = {
   auth: {
     signInWithOAuth: async (provider: "google" | "apple" | "microsoft" | "lovable", opts?: SignInOptions) => {
+      if (!lovableAuth) {
+        return { error: new Error("Auth not initialized") };
+      }
+      
       const result = await lovableAuth.signInWithOAuth(provider, {
         redirect_uri: opts?.redirect_uri,
         extraParams: {

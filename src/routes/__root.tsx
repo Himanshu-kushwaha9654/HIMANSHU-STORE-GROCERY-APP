@@ -10,17 +10,33 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "../components/site-header";
 import { SiteFooter } from "../components/site-footer";
+import { MobileNav } from "../components/mobile-nav";
 import { supabase } from "@/integrations/supabase/client";
+import { CartDrawer } from "../components/cart-drawer";
+import { FlyToCartProvider } from "../components/fly-to-cart-provider";
+import { MiniCart } from "../components/mini-cart";
+import { GlobalQuickView } from "../components/global-quick-view";
+import { GlobalSearchModal } from "../components/global-search-modal";
+import { AiShoppingModal } from "../components/ai-shopping-modal";
+import { FloatingAiButton } from "../components/floating-ai-button";
+import { CustomCursor } from "../components/custom-cursor";
+import { OfflineOverlay } from "../components/offline-overlay";
+import { useAddressStore } from "@/lib/address-store";
+import { lazy, Suspense } from "react";
+
+const AddressPickerModal = lazy(() => import("../components/address-picker-modal").then(m => ({ default: m.AddressPickerModal })));
 
 function NotFoundComponent() {
   return (
@@ -87,24 +103,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Zest — Fresh groceries in 15 minutes" },
+      { title: "Himanshu Store | Premium Grocery" },
       {
         name: "description",
-        content:
-          "Zest delivers hyper-local organic produce, artisan bakery and pantry staples to your door in under 15 minutes.",
+        content: "Premium grocery delivery. Fresh produce, sustainable products, and luxury essentials delivered to your door.",
       },
-      { property: "og:title", content: "Zest — Fresh groceries in 15 minutes" },
+      { property: "og:title", content: "Himanshu Store | Premium Grocery" },
       {
         property: "og:description",
-        content:
-          "Hyper-local organic produce, artisan bakery and pantry staples, delivered in under 15 minutes.",
+        content: "Premium grocery delivery. Fresh produce, sustainable products, and luxury essentials delivered to your door.",
       },
+      { property: "og:image", content: "/og-image.png" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Himanshu Store | Premium Grocery" },
+      { name: "twitter:description", content: "Premium grocery delivery. Fresh produce, sustainable products, and luxury essentials delivered to your door." },
+      { name: "twitter:image", content: "/og-image.png" },
+      { name: "theme-color", content: "#22C55E" },
+      { name: "apple-mobile-web-app-title", content: "Himanshu Store" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" },
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.json" },
     ],
   }),
   shellComponent: RootShell,
@@ -130,8 +156,17 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { isPickerOpen, setIsPickerOpen, loadAddresses } = useAddressStore();
 
   useEffect(() => {
+    // Initialize global stores
+    loadAddresses();
+  }, [loadAddresses]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
@@ -140,16 +175,61 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  const isAuthPage = /^\/(login|signup|forgot-password|reset-password|otp)/.test(pathname);
+  const isAdminPage = pathname.startsWith("/admin");
+  const showCustomerUI = !isAuthPage && !isAdminPage;
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col bg-background">
-        <SiteHeader />
-        <main className="flex-1">
-          <Outlet />
+      <FlyToCartProvider>
+        <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-background sm:max-w-none overflow-x-hidden">
+        {showCustomerUI && (
+          <div className="hidden sm:block">
+            <SiteHeader />
+          </div>
+        )}
+        <main className="flex-1 pb-20 sm:pb-0 relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="h-full w-full"
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+            {showCustomerUI && <GlobalQuickView />}
         </main>
-        <SiteFooter />
+        {showCustomerUI && (
+          <>
+            <MobileNav />
+            <div className="hidden sm:block">
+              <SiteFooter />
+            </div>
+            <CartDrawer />
+            <MiniCart />
+          </>
+        )}
         <Toaster position="top-center" richColors />
+        {showCustomerUI && (
+          <>
+            <GlobalSearchModal />
+            <FloatingAiButton />
+            <AiShoppingModal />
+          </>
+        )}
+        <OfflineOverlay />
+        {isMounted && (
+          <Suspense fallback={null}>
+            <AddressPickerModal isOpen={isPickerOpen} onClose={() => setIsPickerOpen(false)} />
+          </Suspense>
+        )}
+        <CustomCursor />
       </div>
+      </FlyToCartProvider>
     </QueryClientProvider>
   );
 }

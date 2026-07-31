@@ -1,0 +1,78 @@
+/*
+ * Zest — premium admin design system
+ * Warm sun-drenched orange brand, cream surface, tactile rounded UI.
+ * Scoped specifically to the .admin-theme class.
+ */
+
+.admin-theme {
+  --radius: 1rem;
+
+  /* Sun-drenched cream + zinc ink + orange brand */
+  --background: oklch(0.985 0.005 80);      /* #FAFAF9 warm surface */
+  --foreground: #2C2C2E;        /* near-black warm */
+  --surface: oklch(0.985 0.005 80);
+  --ink: #2C2C2E;
+
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.72 0.19 42);           /* warm orange */
+  --primary-foreground: oklch(0.99 0.005 80);
+  --primary-soft: oklch(0.95 0.05 60);      /* peach tint */
+
+  --secondary: oklch(0.96 0.008 80);        /* stone-100 */
+  --secondary-foreground: var(--foreground);
+
+  --muted: oklch(0.96 0.008 80);
+  --muted-foreground: oklch(0.5 0.02 60);
+
+  --accent: oklch(0.94 0.08 130);           /* fresh leafy accent */
+  --accent-foreground: oklch(0.28 0.08 140);
+
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.99 0.005 80);
+
+  --border: oklch(0.9 0.008 80);
+  --input: oklch(0.9 0.008 80);
+  --ring: oklch(0.72 0.19 42);
+
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.admin-theme.dark {
+  --background: oklch(0.16 0.01 60);
+  --foreground: oklch(0.97 0.005 80);
+  --surface: oklch(0.16 0.01 60);
+  --ink: oklch(0.97 0.005 80);
+  --card: oklch(0.2 0.012 60);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0.012 60);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.75 0.19 45);
+  --primary-foreground: oklch(0.15 0.01 60);
+  --primary-soft: oklch(0.3 0.08 45);
+  --secondary: oklch(0.25 0.01 60);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.25 0.01 60);
+  --muted-foreground: oklch(0.7 0.01 60);
+  --accent: oklch(0.35 0.08 140);
+  --accent-foreground: oklch(0.95 0.05 130);
+  --destructive: oklch(0.65 0.22 25);
+  --destructive-foreground: var(--foreground);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.75 0.19 45);
+}
+
+.admin-theme * {
+  border-color: var(--border);
+}
+
+.admin-theme ::selection {
+  background-color: color-mix(in oklab, var(--primary) 20%, transparent);
+}

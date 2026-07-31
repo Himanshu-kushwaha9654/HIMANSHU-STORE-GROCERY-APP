@@ -1,26 +1,32 @@
 import { useEffect, useState } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { AuthService, UserSession } from "@/lib/services/auth-service";
 
 export function useAuth() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<UserSession | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-    });
+    // Read initial session
+    setSession(AuthService.getSession());
+    setLoading(false);
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
+    // Listen for cross-tab or cross-component auth changes
+    const handleAuthChange = () => {
+      setSession(AuthService.getSession());
+    };
 
-    return () => sub.subscription.unsubscribe();
+    window.addEventListener("auth-changed", handleAuthChange);
+    return () => window.removeEventListener("auth-changed", handleAuthChange);
   }, []);
 
-  return { session, user, loading };
+  const user = session ? {
+    email: session.loginId,
+    user_metadata: {
+      full_name: session.fullName
+    }
+  } : null;
+
+  const isAdmin = session?.role === "ADMIN";
+
+  return { session, user, isAdmin, loading };
 }

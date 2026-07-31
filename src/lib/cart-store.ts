@@ -9,16 +9,27 @@ export type CartLine = {
 
 type CartState = {
   lines: CartLine[];
+  isDrawerOpen: boolean;
+  latestAddedProduct: Product | null;
+  cartPulse: number;
+  appliedCoupon: { code: string; discountAmount: number } | null;
   add: (product: Product, qty?: number) => void;
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
   clear: () => void;
+  setIsDrawerOpen: (isOpen: boolean) => void;
+  triggerPulse: () => void;
+  setAppliedCoupon: (coupon: { code: string; discountAmount: number } | null) => void;
 };
 
 export const useCart = create<CartState>()(
   persist(
     (set) => ({
       lines: [],
+      isDrawerOpen: false,
+      latestAddedProduct: null,
+      cartPulse: 0,
+      appliedCoupon: null,
       add: (product, qty = 1) =>
         set((state) => {
           const existing = state.lines.find((l) => l.product.id === product.id);
@@ -27,9 +38,13 @@ export const useCart = create<CartState>()(
               lines: state.lines.map((l) =>
                 l.product.id === product.id ? { ...l, qty: l.qty + qty } : l,
               ),
+              latestAddedProduct: product,
             };
           }
-          return { lines: [...state.lines, { product, qty }] };
+          return { 
+            lines: [...state.lines, { product, qty }],
+            latestAddedProduct: product,
+          };
         }),
       remove: (id) =>
         set((state) => ({ lines: state.lines.filter((l) => l.product.id !== id) })),
@@ -40,7 +55,10 @@ export const useCart = create<CartState>()(
               ? state.lines.filter((l) => l.product.id !== id)
               : state.lines.map((l) => (l.product.id === id ? { ...l, qty } : l)),
         })),
-      clear: () => set({ lines: [] }),
+      clear: () => set({ lines: [], latestAddedProduct: null, appliedCoupon: null }),
+      setIsDrawerOpen: (isOpen) => set({ isDrawerOpen: isOpen }),
+      triggerPulse: () => set((state) => ({ cartPulse: state.cartPulse + 1 })),
+      setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
     }),
     { name: "zest-cart" },
   ),
