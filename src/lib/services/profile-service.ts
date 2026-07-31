@@ -17,7 +17,7 @@ export interface UserProfile {
 }
 
 const DEFAULT_PROFILE: UserProfile = {
-  id: "u-1001",
+  id: "11111111-1111-1111-1111-111111111111",
   fullName: "Himanshu Kushwaha",
   email: "himanshu@example.com",
   phone: "+91 9876543210",
@@ -38,6 +38,11 @@ export const ProfileService = {
     const storedStr = localStorage.getItem(STORAGE_KEY);
     if (storedStr) {
       storedProfile = JSON.parse(storedStr);
+      // Fix legacy invalid UUIDs from old localStorage
+      if (storedProfile.id === "u-1001" || !storedProfile.id.includes("-")) {
+        storedProfile.id = "11111111-1111-1111-1111-111111111111";
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(storedProfile));
+      }
     }
     
     if (session && session.loginId) {
