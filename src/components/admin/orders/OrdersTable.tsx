@@ -92,8 +92,8 @@ export function OrdersTable({ orders, onRowClick, loading }: OrdersTableProps) {
             
             <div className="flex justify-between items-center pt-2 border-t border-slate-100 mt-1">
               <div>
-                <p className="text-[11px] font-medium text-slate-700">{format(new Date(order.created_at), 'MMM d, h:mm a')}</p>
-                <p className="text-[10px] font-medium text-slate-500 mt-0.5">Expected: {order.expected_delivery ? format(new Date(order.expected_delivery), 'h:mm a') : 'N/A'}</p>
+                <p suppressHydrationWarning className="text-[11px] font-medium text-slate-700">{format(new Date(order.created_at), 'MMM d, h:mm a')}</p>
+                <p suppressHydrationWarning className="text-[10px] font-medium text-slate-500 mt-0.5">Expected: {order.expected_delivery ? format(new Date(order.expected_delivery), 'h:mm a') : 'N/A'}</p>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400">
                 <ChevronRight className="size-4" />
@@ -153,8 +153,8 @@ export function OrdersTable({ orders, onRowClick, loading }: OrdersTableProps) {
                   </span>
                 </td>
                 <td className="p-4">
-                  <p className="text-sm font-medium text-slate-700">{format(new Date(order.created_at), 'MMM d, h:mm a')}</p>
-                  <p className="text-xs font-medium text-slate-500 mt-0.5">Expected: {order.expected_delivery ? format(new Date(order.expected_delivery), 'h:mm a') : 'N/A'}</p>
+                  <p suppressHydrationWarning className="text-sm font-medium text-slate-700">{format(new Date(order.created_at), 'MMM d, h:mm a')}</p>
+                  <p suppressHydrationWarning className="text-xs font-medium text-slate-500 mt-0.5">Expected: {order.expected_delivery ? format(new Date(order.expected_delivery), 'h:mm a') : 'N/A'}</p>
                 </td>
                 <td className="p-4 text-right">
                   <Button variant="ghost" size="icon" className="text-slate-400 group-hover:text-emerald-600 group-hover:bg-emerald-50 rounded-xl transition-colors">

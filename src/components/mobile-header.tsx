@@ -5,9 +5,8 @@ import { useNotificationStore } from "@/lib/notification-store";
 import { motion } from "framer-motion";
 
 export function MobileHeader() {
-  const { currentAddress, setIsPickerOpen } = useAddressStore();
-  const unreadCount = useNotificationStore(s => s.notifications.filter(n => !n.read).length);
-  const openNotification = useNotificationStore(s => s.open);
+  const { defaultAddress, setIsPickerOpen } = useAddressStore();
+  const unreadCount = useNotificationStore(s => s.notifications.filter(n => !n.isRead).length);
 
   return (
     <div className="sticky top-0 z-50 w-full bg-white sm:hidden shadow-sm border-b border-slate-100">
@@ -27,23 +26,23 @@ export function MobileHeader() {
               <ChevronDown className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
             </div>
             <div className="text-xs text-slate-500 font-medium truncate mt-0.5 max-w-[220px]">
-              {currentAddress ? `${currentAddress.flat}, ${currentAddress.area}` : "Select your location"}
+              {defaultAddress ? `${defaultAddress.line1}` : "Select your location"}
             </div>
           </div>
 
           {/* Right Icons */}
           <div className="flex items-center gap-3 shrink-0">
-            <button 
-              onClick={() => openNotification()}
+            <Link 
+              to="/notifications"
               className="relative p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors"
             >
               <Bell className="w-5 h-5 text-slate-700" />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white"></span>
               )}
-            </button>
+            </Link>
             <Link 
-              to="/_authenticated/profile"
+              to="/profile"
               className="p-1 border-2 border-emerald-100 rounded-full bg-slate-50 overflow-hidden"
             >
               <div className="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">

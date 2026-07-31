@@ -224,6 +224,7 @@ export const AdminOrderService = {
     // Calculate status counts
     const statusCounts = {
       accepted: 0,
+      packing: 0,
       packed: 0,
       out_for_delivery: 0,
       delivered: 0,

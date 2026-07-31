@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, LayoutGrid, ShoppingCart, Heart, User } from "lucide-react";
 import { useCart, selectCartCount } from "@/lib/cart-store";
-import { useNotificationStore } from "@/lib/notification-store";
+
 
 export function MobileNav() {
   const count = useCart(selectCartCount);
@@ -62,10 +62,10 @@ export function MobileNav() {
 
         {/* Profile */}
         <Link
-          to="/_authenticated/profile"
-          className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive("/_authenticated/profile") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
+          to="/profile"
+          className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive("/profile") ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
         >
-          <User className={`size-[22px] ${isActive("/_authenticated/profile") ? "fill-emerald-600/20" : ""}`} strokeWidth={isActive("/_authenticated/profile") ? 2.5 : 2} />
+          <User className={`size-[22px] ${isActive("/profile") ? "fill-emerald-600/20" : ""}`} strokeWidth={isActive("/profile") ? 2.5 : 2} />
           <span className="text-[10px] font-semibold tracking-tight">Profile</span>
         </Link>
         

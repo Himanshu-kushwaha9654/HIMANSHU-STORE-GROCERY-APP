@@ -57,7 +57,7 @@ export function OrderDetailsDrawer({ order, isOpen, onClose, onStatusUpdated }: 
                 {order.order_status.replace(/_/g, ' ')}
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-500 flex items-center gap-2">
+            <p suppressHydrationWarning className="text-sm font-medium text-slate-500 flex items-center gap-2">
               <Clock className="size-4" />
               {format(new Date(order.created_at), 'PPP at p')}
             </p>
@@ -215,7 +215,7 @@ export function OrderDetailsDrawer({ order, isOpen, onClose, onStatusUpdated }: 
                     <p className="text-sm font-bold text-slate-700 capitalize">
                       Marked as {log.status_to.replace(/_/g, ' ')}
                     </p>
-                    <p className="text-xs font-medium text-slate-500 mt-0.5">
+                    <p suppressHydrationWarning className="text-xs font-medium text-slate-500 mt-0.5">
                       {format(new Date(log.created_at), 'MMM d, h:mm a')} • By {log.changed_by}
                     </p>
                     {log.notes && (

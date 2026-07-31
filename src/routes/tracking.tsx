@@ -65,48 +65,6 @@ function LiveTrackingPage() {
     }, 250);
   };
 
-  // Demo mode simulation: automatically advance order status every 8 seconds
-  useEffect(() => {
-    if (!order || order.status === 'Delivered' || order.status === 'Cancelled') return;
-
-    const interval = setInterval(() => {
-      setOrder(prev => {
-        if (!prev) return prev;
-        
-        let nextStatus = prev.status;
-        let text = "";
-        
-        if (prev.status === 'Order Placed') {
-          nextStatus = 'Payment Confirmed';
-          text = "Store has accepted your order 📦";
-        } else if (prev.status === 'Payment Confirmed') {
-          nextStatus = 'Preparing Order';
-          text = "Your order is being packed 🛒";
-        } else if (prev.status === 'Preparing Order') {
-          nextStatus = 'Packed';
-          text = "Order packed and waiting for rider 🛍️";
-        } else if (prev.status === 'Packed') {
-          nextStatus = 'Out for Delivery';
-          text = "Rider picked up your groceries 🛵";
-        } else if (prev.status === 'Out for Delivery') {
-          nextStatus = 'Delivered';
-          text = "Your order was delivered! 🎉";
-          triggerConfetti();
-        }
-
-        if (nextStatus !== prev.status) {
-          const id = Date.now();
-          setNotification({ id, text });
-          setTimeout(() => setNotification(null), 4000);
-        }
-
-        return { ...prev, status: nextStatus };
-      });
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, [order?.status]);
-
   // Subscribe to real-time changes
   useEffect(() => {
     if (!order) return;
