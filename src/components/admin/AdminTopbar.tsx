@@ -46,7 +46,7 @@ export function AdminTopbar({ onOpenSearch, onToggleSidebar }: AdminTopbarProps)
         </div>
 
         {/* Date */}
-        <div className="hidden md:block text-xs font-bold text-slate-400 mr-2">
+        <div suppressHydrationWarning className="hidden md:block text-xs font-bold text-slate-400 mr-2">
           {format(new Date(), "MMM dd, yyyy")}
         </div>
 

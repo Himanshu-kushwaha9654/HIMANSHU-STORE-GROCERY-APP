@@ -24,10 +24,11 @@ const INITIAL_ACTIVITIES = [
 export function LiveStoreStatus() {
   const [metrics, setMetrics] = useState(generateMetrics());
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Simulate real-time data updates
   useEffect(() => {
+    setLastUpdated(new Date());
     const interval = setInterval(() => {
       setMetrics(prev => prev.map(m => {
         if (m.id === 'visitors' || m.id === 'carts') {
