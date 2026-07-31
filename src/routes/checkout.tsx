@@ -154,7 +154,9 @@ function CheckoutPage() {
         p_coupon_code: couponApplied ? couponCode : null,
         p_items: cartLines.map(line => ({
           product_id: line.product.id,
-          quantity: line.qty
+          quantity: line.qty,
+          price: line.product.price,
+          name: line.product.name
         }))
       };
 

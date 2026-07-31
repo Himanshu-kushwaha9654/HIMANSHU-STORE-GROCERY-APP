@@ -10,7 +10,7 @@ export class OrderService {
     const user = useProfileStore.getState().profile;
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('orders')
       .select(`
         *,
@@ -31,7 +31,7 @@ export class OrderService {
    * Fetches a single order by ID.
    */
   static async getOrderById(id: string): Promise<Order | undefined> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('orders')
       .select(`
         *,
@@ -60,7 +60,7 @@ export class OrderService {
    * Cancels an order (if allowed).
    */
   static async cancelOrder(id: string): Promise<void> {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('orders')
       .update({ order_status: 'cancelled' })
       .eq('id', id);
@@ -82,15 +82,28 @@ export class OrderService {
     p_payment_method: string;
     p_notes: string | null;
     p_coupon_code: string | null;
-    p_items: { product_id: string; quantity: number }[];
+    p_items: { product_id: string; quantity: number; price?: number; name?: string }[];
   }): Promise<string> {
-    const { data, error } = await supabase.rpc('place_order', payload);
-    
+    console.log("========== PLACE ORDER PAYLOAD ==========");
+    console.log(payload);
+
+    const { data, error } = await (supabase as any).rpc("place_order", payload);
+
+    console.log("========== RPC RESPONSE ==========");
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
+
     if (error) {
-      console.error("Error placing order:", error);
-      throw new Error(error.message || "Failed to place order.");
+      console.error("========== FULL RPC ERROR ==========");
+      console.error(error);
+      console.error("Code:", error.code);
+      console.error("Message:", error.message);
+      console.error("Details:", error.details);
+      console.error("Hint:", error.hint);
+
+      throw error;
     }
-    
+
     return data;
   }
 
